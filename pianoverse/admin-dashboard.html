@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | PianoVerse Admin</title>
+  <link rel="stylesheet" href="assets/css/admin.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎹</text></svg>">
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="admin-sidebar" id="adminSidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🎹</div>
+    <span class="logo-text">Piano<span>Verse</span></span>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Main</div>
+    <ul class="sidebar-nav">
+      <li class="nav-item"><a href="admin-dashboard.html" class="nav-link active" data-page="dashboard"><span class="nav-icon">📊</span> Dashboard</a></li>
+      <li class="nav-item"><a href="admin-users.html" class="nav-link" data-page="users"><span class="nav-icon">👥</span> Users <span class="nav-badge">180K</span></a></li>
+      <li class="nav-item"><a href="admin-songs.html" class="nav-link" data-page="songs"><span class="nav-icon">🎵</span> Songs</a></li>
+      <li class="nav-item"><a href="admin-layouts.html" class="nav-link" data-page="layouts"><span class="nav-icon">🎹</span> Layouts</a></li>
+    </ul>
+
+    <div class="sidebar-section-label" style="margin-top:16px;">Monetization</div>
+    <ul class="sidebar-nav">
+      <li class="nav-item"><a href="admin-ads.html" class="nav-link" data-page="ads"><span class="nav-icon">📢</span> Ads</a></li>
+      <li class="nav-item"><a href="#revenue" class="nav-link" data-page="revenue" onclick="showSection('revenue')"><span class="nav-icon">💰</span> Revenue</a></li>
+      <li class="nav-item"><a href="#analytics" class="nav-link" data-page="analytics" onclick="showSection('analytics')"><span class="nav-icon">📈</span> Analytics</a></li>
+    </ul>
+
+    <div class="sidebar-section-label" style="margin-top:16px;">Manage</div>
+    <ul class="sidebar-nav">
+      <li class="nav-item"><a href="#notifications" class="nav-link" data-page="notifications" onclick="showSection('notifications')"><span class="nav-icon">🔔</span> Notifications <span class="nav-badge red">3</span></a></li>
+      <li class="nav-item"><a href="#reviews" class="nav-link" data-page="reviews" onclick="showSection('reviews')"><span class="nav-icon">⭐</span> Reviews</a></li>
+      <li class="nav-item"><a href="admin-seo.html" class="nav-link" data-page="seo"><span class="nav-icon">🔍</span> SEO</a></li>
+      <li class="nav-item"><a href="admin-settings.html" class="nav-link" data-page="settings"><span class="nav-icon">⚙️</span> Settings</a></li>
+    </ul>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="admin-user-badge" id="userBadge">
+      <div class="user-avatar" id="userAvatarSidebar">A</div>
+      <div class="user-info">
+        <div class="user-name" id="userNameSidebar">Admin User</div>
+        <div class="user-role">Super Admin</div>
+      </div>
+    </div>
+    <a href="#" class="nav-link admin-logout-btn" style="margin-top:4px;">
+      <span class="nav-icon">🚪</span> Log Out
+    </a>
+  </div>
+</aside>
+
+<!-- ═══ TOP BAR ═══ -->
+<header class="admin-topbar">
+  <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+  <div>
+    <div class="topbar-title" id="pageTitle">Dashboard</div>
+    <div class="topbar-breadcrumb"><span>PianoVerse</span><span class="sep">›</span><span id="pageBreadcrumb">Overview</span></div>
+  </div>
+  <div class="topbar-actions">
+    <div class="topbar-search" onclick="AdminToast.show('Search coming soon', 'info')">
+      🔍 <span>Search anything...</span>
+      <span style="margin-left:auto;font-size:0.7rem;color:var(--ad-text-muted);">⌘K</span>
+    </div>
+    <button class="topbar-icon-btn" id="themeToggleBtn" title="Toggle theme">🌙</button>
+    <button class="topbar-icon-btn" title="Notifications" onclick="showSection('notifications')">
+      🔔 <span class="notif-dot"></span>
+    </button>
+    <button class="topbar-icon-btn" title="Activity Log" onclick="showSection('activity')">📋</button>
+    <button class="topbar-icon-btn" title="Download Report" onclick="downloadReport()">⬇️</button>
+  </div>
+</header>
+
+<!-- ═══ MAIN CONTENT ═══ -->
+<main class="admin-content">
+
+  <!-- ══ OVERVIEW ══ -->
+  <div id="section-overview">
+    <div class="page-header">
+      <div class="page-header-left">
+        <h1>Good morning, <span id="adminGreetName" style="color:var(--ad-accent);">Admin</span> 👋</h1>
+        <p id="dashDate">Loading date...</p>
+      </div>
+      <div class="page-actions">
+        <button class="ad-btn ad-btn-secondary" onclick="refreshStats()">🔄 Refresh</button>
+        <button class="ad-btn ad-btn-secondary" onclick="AdminExport.toPDF('Dashboard Report', document.getElementById('section-overview').innerHTML)">📄 PDF Report</button>
+        <button class="ad-btn ad-btn-primary" onclick="showSection('notifications')">📢 New Announcement</button>
+      </div>
+    </div>
+
+    <!-- Announcement Banner -->
+    <div class="ad-alert ad-alert-info" id="announcementBanner" style="display:none;">
+      <span>📣</span>
+      <span id="announcementText"></span>
+    </div>
+
+    <!-- ── Stats Cards ── -->
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card blue" style="--card-color: rgba(59,130,246,0.08)">
+        <div class="stat-header">
+          <span class="stat-label">Total Users</span>
+          <div class="stat-icon" style="background:var(--ad-blue-light);">👥</div>
+        </div>
+        <div class="stat-value" id="statUsers">180,421</div>
+        <div class="stat-change up">↑ 12.3% <span>vs last month</span></div>
+      </div>
+      <div class="stat-card green" style="--card-color: rgba(16,185,129,0.08)">
+        <div class="stat-header">
+          <span class="stat-label">Active Today</span>
+          <div class="stat-icon" style="background:var(--ad-green-light);">🟢</div>
+        </div>
+        <div class="stat-value" id="statActive">4,832</div>
+        <div class="stat-change up">↑ 8.1% <span>vs yesterday</span></div>
+      </div>
+      <div class="stat-card purple" style="--card-color: rgba(139,92,246,0.08)">
+        <div class="stat-header">
+          <span class="stat-label">Songs Played</span>
+          <div class="stat-icon" style="background:rgba(139,92,246,0.12);">🎵</div>
+        </div>
+        <div class="stat-value" id="statSongs">2.4M</div>
+        <div class="stat-change up">↑ 22.7% <span>this month</span></div>
+      </div>
+      <div class="stat-card yellow" style="--card-color: rgba(245,158,11,0.08)">
+        <div class="stat-header">
+          <span class="stat-label">Est. Revenue</span>
+          <div class="stat-icon" style="background:var(--ad-yellow-light);">💰</div>
+        </div>
+        <div class="stat-value" id="statRevenue">$8,240</div>
+        <div class="stat-change up">↑ 18.4% <span>this month</span></div>
+      </div>
+      <div class="stat-card red" style="--card-color: rgba(244,63,94,0.08)">
+        <div class="stat-header">
+          <span class="stat-label">Ad Clicks</span>
+          <div class="stat-icon" style="background:var(--ad-red-light);">📢</div>
+        </div>
+        <div class="stat-value" id="statAdClicks">12,841</div>
+        <div class="stat-change down">↓ 2.1% <span>vs last week</span></div>
+      </div>
+      <div class="stat-card cyan" style="--card-color: rgba(6,182,212,0.08)">
+        <div class="stat-header">
+          <span class="stat-label">Downloads</span>
+          <div class="stat-icon" style="background:rgba(6,182,212,0.1);">⬇️</div>
+        </div>
+        <div class="stat-value" id="statDownloads">28,130</div>
+        <div class="stat-change up">↑ 34.2% <span>this month</span></div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-header">
+          <span class="stat-label">Returning Users</span>
+          <div class="stat-icon" style="background:var(--ad-blue-light);">🔁</div>
+        </div>
+        <div class="stat-value" id="statReturning">68%</div>
+        <div class="stat-change up">↑ 4.5% <span>vs last month</span></div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-header">
+          <span class="stat-label">Avg Session</span>
+          <div class="stat-icon" style="background:var(--ad-green-light);">⏱</div>
+        </div>
+        <div class="stat-value" id="statAvgSession">8m 42s</div>
+        <div class="stat-change up">↑ 1m 12s <span>improvement</span></div>
+      </div>
+    </div>
+
+    <!-- ── Charts Row ── -->
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Traffic Overview</div>
+            <div class="chart-subtitle">Visitors & sessions over time</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px;">
+            <div class="chart-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:#6366f1"></div>Visitors</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#06b6d4"></div>Sessions</div>
+            </div>
+            <div class="chart-actions">
+              <button class="chart-period-btn active" onclick="setPeriod('30d', this)">30d</button>
+              <button class="chart-period-btn" onclick="setPeriod('7d', this)">7d</button>
+            </div>
+          </div>
+        </div>
+        <canvas id="trafficChart" style="width:100%;height:240px;"></canvas>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Device Breakdown</div>
+            <div class="chart-subtitle">Platform distribution</div>
+          </div>
+        </div>
+        <canvas id="deviceChart" style="width:100%;height:200px;"></canvas>
+      </div>
+    </div>
+
+    <!-- ── Second Row Charts ── -->
+    <div class="two-col" style="margin-bottom:24px;">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Top Piano Layouts</div>
+            <div class="chart-subtitle">Usage by play count</div>
+          </div>
+        </div>
+        <canvas id="layoutChart" style="width:100%;height:200px;"></canvas>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Revenue (6 months)</div>
+            <div class="chart-subtitle">Estimated ad revenue</div>
+          </div>
+        </div>
+        <canvas id="revenueChart" style="width:100%;height:200px;"></canvas>
+      </div>
+    </div>
+
+    <!-- ── Recent Users + Activity ── -->
+    <div class="two-col">
+      <!-- Recent Users -->
+      <div class="table-card">
+        <div class="table-header">
+          <div>
+            <div class="table-title">Recent Users</div>
+            <div class="table-count" id="recentUserCount">Showing 5 of 180,421</div>
+          </div>
+          <div class="table-controls">
+            <a href="admin-users.html" class="ad-btn ad-btn-secondary">View All</a>
+          </div>
+        </div>
+        <table class="data-table" id="recentUsersTable">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Country</th>
+              <th>Plan</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="recentUsersTbody"></tbody>
+        </table>
+      </div>
+
+      <!-- Activity Log -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Activity Log</div>
+            <div class="chart-subtitle">Recent admin actions</div>
+          </div>
+          <button class="ad-btn ad-btn-secondary" onclick="clearLogs()">Clear</button>
+        </div>
+        <ul class="activity-list" id="activityList"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ REVENUE SECTION ══ -->
+  <div id="section-revenue" style="display:none;">
+    <div class="page-header">
+      <div class="page-header-left">
+        <h1>Revenue Panel</h1>
+        <p>Estimated earnings from advertising</p>
+      </div>
+      <div class="page-actions">
+        <button class="ad-btn ad-btn-secondary" onclick="AdminExport.toCSV(getRevenueData(), 'revenue-report.csv')">📤 Export CSV</button>
+        <button class="ad-btn ad-btn-primary" onclick="showSection('overview')">← Back</button>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card yellow">
+        <div class="stat-header"><span class="stat-label">Est. Monthly Revenue</span><div class="stat-icon" style="background:var(--ad-yellow-light);">💰</div></div>
+        <div class="stat-value">$8,240</div>
+        <div class="stat-change up">↑ 18.4%</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-header"><span class="stat-label">CPM</span><div class="stat-icon" style="background:var(--ad-blue-light);">📊</div></div>
+        <div class="stat-value">$2.50</div>
+        <div class="stat-change up">↑ 0.30</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-header"><span class="stat-label">CTR</span><div class="stat-icon" style="background:var(--ad-green-light);">🖱</div></div>
+        <div class="stat-value">3.2%</div>
+        <div class="stat-change up">↑ 0.8%</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-header"><span class="stat-label">Ad Impressions</span><div class="stat-icon" style="background:var(--ad-red-light);">👁</div></div>
+        <div class="stat-value">3.29M</div>
+        <div class="stat-change up">↑ 24%</div>
+      </div>
+    </div>
+
+    <div class="two-col" style="margin-top:24px;">
+      <div>
+        <div class="revenue-metric">
+          <div class="revenue-metric-title">Daily Estimate</div>
+          <div class="revenue-metric-value" style="color:var(--ad-green);">$274.67</div>
+          <div class="revenue-metric-desc">Based on current CPM and daily traffic of 5,200 sessions</div>
+        </div>
+        <div class="revenue-metric">
+          <div class="revenue-metric-title">Weekly Estimate</div>
+          <div class="revenue-metric-value" style="color:var(--ad-accent);">$1,922.69</div>
+          <div class="revenue-metric-desc">Rolling 7-day average with current ad performance</div>
+        </div>
+        <div class="revenue-metric">
+          <div class="revenue-metric-title">Yearly Projection</div>
+          <div class="revenue-metric-value" style="color:var(--ad-yellow);">$98,880</div>
+          <div class="revenue-metric-desc">At current growth rate of +18.4% MoM</div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Revenue Trend</div>
+        </div>
+        <canvas id="revenueDetailChart" style="width:100%;height:280px;"></canvas>
+      </div>
+    </div>
+
+    <!-- CPM Config -->
+    <div class="chart-card" style="margin-top:16px;">
+      <div class="chart-header">
+        <div class="chart-title">Revenue Settings</div>
+        <button class="ad-btn ad-btn-primary" onclick="saveRevenueSettings()">Save Changes</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;padding-top:8px;">
+        <div class="ad-form-group">
+          <label class="ad-label">CPM Rate ($)</label>
+          <input type="number" class="ad-input" id="cpmRate" value="2.50" step="0.10">
+        </div>
+        <div class="ad-form-group">
+          <label class="ad-label">AdSense Publisher ID</label>
+          <input type="text" class="ad-input" id="adsenseId" value="ca-pub-XXXXXXXXXXXXXXXX">
+        </div>
+        <div class="ad-form-group">
+          <label class="ad-label">Revenue Share (%)</label>
+          <input type="number" class="ad-input" id="revShare" value="68" min="0" max="100">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ANALYTICS SECTION ══ -->
+  <div id="section-analytics" style="display:none;">
+    <div class="page-header">
+      <div class="page-header-left">
+        <h1>Analytics</h1>
+        <p>Deep dive into platform performance</p>
+      </div>
+      <div class="page-actions">
+        <button class="ad-btn ad-btn-secondary" onclick="AdminExport.toCSV(getAnalyticsData(), 'analytics.csv')">📤 Export CSV</button>
+        <button class="ad-btn ad-btn-primary" onclick="showSection('overview')">← Back</button>
+      </div>
+    </div>
+
+    <div class="stats-grid" style="margin-bottom:24px;">
+      <div class="stat-card blue"><div class="stat-header"><span class="stat-label">Pageviews</span><div class="stat-icon" style="background:var(--ad-blue-light);">📄</div></div><div class="stat-value">1.2M</div><div class="stat-change up">↑ 15%</div></div>
+      <div class="stat-card green"><div class="stat-header"><span class="stat-label">Bounce Rate</span><div class="stat-icon" style="background:var(--ad-green-light);">🏀</div></div><div class="stat-value">24.3%</div><div class="stat-change up">↓ 3.2% (better)</div></div>
+      <div class="stat-card purple"><div class="stat-header"><span class="stat-label">Avg Session</span><div class="stat-icon" style="background:rgba(139,92,246,0.12);">⏱</div></div><div class="stat-value">8m 42s</div><div class="stat-change up">↑ 1m 12s</div></div>
+      <div class="stat-card yellow"><div class="stat-header"><span class="stat-label">Challenge Joins</span><div class="stat-icon" style="background:var(--ad-yellow-light);">🏆</div></div><div class="stat-value">3,420</div><div class="stat-change up">↑ 41%</div></div>
+    </div>
+
+    <div class="charts-row" style="margin-bottom:24px;">
+      <div class="chart-card">
+        <div class="chart-header"><div class="chart-title">Weekly Growth</div></div>
+        <canvas id="weeklyChart" style="width:100%;height:220px;"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title" style="margin-bottom:16px;">Top Countries</div>
+        <div id="countryList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ NOTIFICATIONS SECTION ══ -->
+  <div id="section-notifications" style="display:none;">
+    <div class="page-header">
+      <div class="page-header-left">
+        <h1>Notifications</h1>
+        <p>Send announcements and push messages</p>
+      </div>
+      <div class="page-actions">
+        <button class="ad-btn ad-btn-primary" onclick="showSection('overview')">← Back</button>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="notif-composer">
+          <div style="font-size:0.95rem;font-weight:700;margin-bottom:20px;">📢 Site Announcement</div>
+          <div class="ad-form-group">
+            <label class="ad-label">Announcement Title</label>
+            <input type="text" class="ad-input" id="notifTitle" placeholder="e.g. New Piano Layout Available!">
+          </div>
+          <div class="ad-form-group">
+            <label class="ad-label">Message</label>
+            <textarea class="ad-textarea" id="notifMessage" placeholder="Write your announcement here..."></textarea>
+          </div>
+          <div class="ad-form-group">
+            <label class="ad-label">Type</label>
+            <select class="ad-input" id="notifType">
+              <option value="info">ℹ️ Info</option>
+              <option value="success">✅ Success</option>
+              <option value="warning">⚠️ Warning</option>
+              <option value="promo">🎁 Promo</option>
+              <option value="event">🎉 Event</option>
+            </select>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info"><h4>Show on Homepage</h4><p>Display as banner on main site</p></div>
+            <label class="ad-toggle"><input type="checkbox" id="showOnHome" checked><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info"><h4>Popup Notification</h4><p>Show as popup to all users</p></div>
+            <label class="ad-toggle"><input type="checkbox" id="showPopup"><span class="toggle-slider"></span></label>
+          </div>
+          <button class="ad-btn ad-btn-primary" style="margin-top:20px;width:100%;" onclick="sendAnnouncement()">📤 Send Announcement</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="chart-card">
+          <div class="chart-title" style="margin-bottom:20px;">📋 Recent Notifications</div>
+          <div id="notifHistoryList">
+            <div class="ad-alert ad-alert-info"><span>📣</span> <div><strong>New Feature:</strong> Blues Scale layout now available for all users.</div></div>
+            <div class="ad-alert ad-alert-success" style="margin-top:8px;"><span>✅</span> <div><strong>Maintenance Complete:</strong> Server upgrade successful. Faster load times.</div></div>
+            <div class="ad-alert ad-alert-warn" style="margin-top:8px;"><span>⚠️</span> <div><strong>Scheduled Downtime:</strong> 2-hour maintenance window next Sunday 2AM UTC.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ REVIEWS SECTION ══ -->
+  <div id="section-reviews" style="display:none;">
+    <div class="page-header">
+      <div class="page-header-left">
+        <h1>Reviews & Feedback</h1>
+        <p>User messages, ratings, and complaints</p>
+      </div>
+    </div>
+
+    <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:24px;">
+      <div class="stat-card green"><div class="stat-header"><span class="stat-label">Avg Rating</span><div class="stat-icon" style="background:var(--ad-green-light);">⭐</div></div><div class="stat-value">4.7</div></div>
+      <div class="stat-card blue"><div class="stat-header"><span class="stat-label">Total Reviews</span><div class="stat-icon" style="background:var(--ad-blue-light);">💬</div></div><div class="stat-value">2,841</div></div>
+      <div class="stat-card yellow"><div class="stat-header"><span class="stat-label">Pending</span><div class="stat-icon" style="background:var(--ad-yellow-light);">⏳</div></div><div class="stat-value">12</div></div>
+      <div class="stat-card red"><div class="stat-header"><span class="stat-label">Complaints</span><div class="stat-icon" style="background:var(--ad-red-light);">🚨</div></div><div class="stat-value">3</div></div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-header"><div class="table-title">User Feedback</div></div>
+      <table class="data-table">
+        <thead><tr><th>User</th><th>Rating</th><th>Message</th><th>Date</th><th>Actions</th></tr></thead>
+        <tbody id="reviewsTbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ ACTIVITY LOG SECTION ══ -->
+  <div id="section-activity" style="display:none;">
+    <div class="page-header">
+      <div class="page-header-left"><h1>Activity Log</h1><p>All admin actions and system events</p></div>
+      <div class="page-actions">
+        <button class="ad-btn ad-btn-secondary" onclick="clearLogs()">🗑 Clear Logs</button>
+        <button class="ad-btn ad-btn-secondary" onclick="AdminExport.toCSV(AdminLogger.getLogs(), 'activity-log.csv')">📤 Export</button>
+      </div>
+    </div>
+    <div class="table-card">
+      <div class="table-header"><div class="table-title">Admin Activity</div></div>
+      <table class="data-table">
+        <thead><tr><th>Action</th><th>Details</th><th>User</th><th>Time</th></tr></thead>
+        <tbody id="activityTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<script src="assets/js/admin.js"></script>
+<script>
+// ─── Auth Guard ───────────────────────────────────
+const session = AdminAuth.requireAuth();
+if (!session) throw new Error('Not authenticated');
+
+// ─── Init ────────────────────────────────────────
+document.getElementById('adminGreetName').textContent = session.name || 'Admin';
+document.getElementById('userNameSidebar').textContent = session.name || 'Admin User';
+document.getElementById('userAvatarSidebar').textContent = (session.name || 'A')[0].toUpperCase();
+document.getElementById('dashDate').textContent = new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+AdminUI.initSidebar();
+AdminLogger.log('Dashboard viewed', 'Admin opened main dashboard', '📊');
+
+// ─── Section Navigation ──────────────────────────
+function showSection(name) {
+  document.querySelectorAll('[id^="section-"]').forEach(el => el.style.display = 'none');
+  const el = document.getElementById('section-' + name);
+  if (el) el.style.display = 'block';
+  document.getElementById('pageTitle').textContent = {
+    overview: 'Dashboard', revenue: 'Revenue Panel', analytics: 'Analytics',
+    notifications: 'Notifications', reviews: 'Reviews', activity: 'Activity Log'
+  }[name] || 'Dashboard';
+  document.getElementById('pageBreadcrumb').textContent = {
+    overview: 'Overview', revenue: 'Revenue', analytics: 'Analytics',
+    notifications: 'Notifications', reviews: 'Reviews & Feedback', activity: 'Activity Log'
+  }[name] || name;
+
+  if (name === 'analytics') {
+    setTimeout(() => {
+      AdminCharts.buildWeeklyChart('weeklyChart');
+      renderCountryList();
+    }, 50);
+  }
+  if (name === 'revenue') {
+    setTimeout(() => AdminCharts.buildRevenueChart('revenueDetailChart'), 50);
+  }
+  if (name === 'reviews') renderReviews();
+  if (name === 'activity') renderActivityTable();
+}
+
+// ─── Init Charts ─────────────────────────────────
+setTimeout(() => {
+  AdminCharts.buildTrafficChart('trafficChart');
+  AdminCharts.buildDeviceChart('deviceChart');
+  AdminCharts.buildLayoutChart('layoutChart');
+  AdminCharts.buildRevenueChart('revenueChart');
+}, 100);
+
+// ─── Recent Users Table ──────────────────────────
+function renderRecentUsers() {
+  const users = PVDB_Admin.getUsers().slice(0, 5);
+  const tbody = document.getElementById('recentUsersTbody');
+  tbody.innerHTML = users.map(u => `
+    <tr>
+      <td><div class="user-cell">
+        <div class="user-avatar-sm">${u.avatar}</div>
+        <div><div class="user-name-td">${u.name}</div><div class="user-email-td">${u.email}</div></div>
+      </div></td>
+      <td>${u.country}</td>
+      <td><span class="ad-tag ${u.plan === 'premium' ? 'ad-tag-yellow' : 'ad-tag-blue'}">${u.plan}</span></td>
+      <td><span class="status-badge status-${u.status}">${u.status}</span></td>
+    </tr>
+  `).join('');
+}
+
+// ─── Activity Log ────────────────────────────────
+function renderActivityLog() {
+  const logs = AdminLogger.getLogs().slice(0, 8);
+  const list = document.getElementById('activityList');
+  const colors = { '📊': '#6366f1', '👥': '#06b6d4', '🎵': '#10b981', '📄': '#f59e0b', '🎨': '#8b5cf6', '🚪': '#f43f5e' };
+  if (!logs.length) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><h3>No activity yet</h3></div>';
+    return;
+  }
+  list.innerHTML = logs.map(l => `
+    <li class="activity-item">
+      <div class="activity-icon" style="background:${colors[l.icon] || '#6366f1'}20;color:${colors[l.icon] || '#6366f1'}">${l.icon}</div>
+      <div>
+        <div class="activity-text"><span class="activity-user">${l.user}</span> — ${l.action}</div>
+        <div class="activity-time">${l.details} · ${new Date(l.ts).toLocaleTimeString()}</div>
+      </div>
+    </li>
+  `).join('');
+}
+
+function renderActivityTable() {
+  const logs = AdminLogger.getLogs();
+  const tbody = document.getElementById('activityTableBody');
+  tbody.innerHTML = logs.map(l => `
+    <tr>
+      <td><div style="display:flex;align-items:center;gap:8px;">${l.icon} <strong>${l.action}</strong></div></td>
+      <td style="color:var(--ad-text-secondary)">${l.details}</td>
+      <td>${l.user}</td>
+      <td style="color:var(--ad-text-muted);white-space:nowrap;">${new Date(l.ts).toLocaleString()}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="4" class="empty-state">No logs yet.</td></tr>';
+}
+
+function clearLogs() {
+  localStorage.removeItem('pv_admin_log');
+  AdminLogger.log('Logs cleared', 'Activity log was cleared', '🗑');
+  renderActivityLog();
+  AdminToast.show('Activity log cleared', 'success');
+}
+
+// ─── Charts Period Toggle ─────────────────────────
+function setPeriod(period, btn) {
+  document.querySelectorAll('.chart-period-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  AdminCharts.buildTrafficChart('trafficChart');
+}
+
+// ─── Country List ─────────────────────────────────
+function renderCountryList() {
+  const countries = [
+    { name: 'United States', code: 'US', pct: 28, users: 50517 },
+    { name: 'United Kingdom', code: 'GB', pct: 12, users: 21650 },
+    { name: 'Japan', code: 'JP', pct: 10, users: 18042 },
+    { name: 'Germany', code: 'DE', pct: 8, users: 14433 },
+    { name: 'Canada', code: 'CA', pct: 7, users: 12629 },
+    { name: 'India', code: 'IN', pct: 6, users: 10825 },
+    { name: 'Australia', code: 'AU', pct: 5, users: 9021 },
+    { name: 'France', code: 'FR', pct: 4, users: 7216 },
+  ];
+  document.getElementById('countryList').innerHTML = countries.map(c => `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+      <span style="font-size:1rem;min-width:28px;text-align:center;">${getFlagEmoji(c.code)}</span>
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:4px;">
+          <span>${c.name}</span><span style="color:var(--ad-text-muted)">${c.users.toLocaleString()} users</span>
+        </div>
+        <div class="progress-bar" style="height:6px;background:rgba(255,255,255,0.05);border-radius:3px;">
+          <div style="height:100%;width:${c.pct}%;background:linear-gradient(90deg,#6366f1,#8b5cf6);border-radius:3px;"></div>
+        </div>
+      </div>
+      <span style="font-size:0.8rem;font-weight:700;min-width:32px;text-align:right;">${c.pct}%</span>
+    </div>
+  `).join('');
+}
+
+function getFlagEmoji(code) {
+  const flags = { US:'🇺🇸', GB:'🇬🇧', JP:'🇯🇵', DE:'🇩🇪', CA:'🇨🇦', IN:'🇮🇳', AU:'🇦🇺', FR:'🇫🇷' };
+  return flags[code] || '🌐';
+}
+
+// ─── Reviews ─────────────────────────────────────
+function renderReviews() {
+  const reviews = [
+    { user:'Alex R.', rating:5, msg:'Best piano app I\'ve ever used! The neon theme is 🔥', date:'2025-06-10', type:'positive' },
+    { user:'Sam C.', rating:4, msg:'Love the layout options. Would love more songs though.', date:'2025-06-09', type:'positive' },
+    { user:'Jordan L.', rating:3, msg:'Good app but mobile experience needs improvement.', date:'2025-06-08', type:'neutral' },
+    { user:'Taylor K.', rating:5, msg:'I\'ve been using this daily for 3 months. Amazing!', date:'2025-06-07', type:'positive' },
+    { user:'Casey P.', rating:2, msg:'Recording feature sometimes crashes on iOS.', date:'2025-06-06', type:'complaint' },
+  ];
+  const stars = n => '★'.repeat(n) + '☆'.repeat(5-n);
+  document.getElementById('reviewsTbody').innerHTML = reviews.map(r => `
+    <tr>
+      <td><div class="user-cell"><div class="user-avatar-sm">${r.user[0]}</div><span class="user-name-td">${r.user}</span></div></td>
+      <td><span style="color:${r.rating >= 4 ? 'var(--ad-yellow)' : r.rating >= 3 ? 'var(--ad-text-secondary)' : 'var(--ad-red)'}">${stars(r.rating)}</span></td>
+      <td style="max-width:300px;font-size:0.83rem;">${r.msg}</td>
+      <td style="color:var(--ad-text-muted)">${r.date}</td>
+      <td><div class="table-actions">
+        <button class="action-btn" title="Reply">💬</button>
+        <button class="action-btn danger" title="Delete">🗑</button>
+      </div></td>
+    </tr>
+  `).join('');
+}
+
+// ─── Notifications ────────────────────────────────
+function sendAnnouncement() {
+  const title = document.getElementById('notifTitle').value.trim();
+  const msg = document.getElementById('notifMessage').value.trim();
+  if (!title || !msg) { AdminToast.show('Please fill in title and message', 'warning'); return; }
+  
+  const settings = JSON.parse(localStorage.getItem('pv_settings') || '{}');
+  settings.announcement = `${title}: ${msg}`;
+  localStorage.setItem('pv_settings', JSON.stringify(settings));
+  
+  AdminLogger.log('Announcement Sent', title, '📢');
+  AdminToast.show('Announcement sent successfully!', 'success');
+  document.getElementById('notifTitle').value = '';
+  document.getElementById('notifMessage').value = '';
+}
+
+// ─── Revenue Settings ─────────────────────────────
+function saveRevenueSettings() {
+  AdminLogger.log('Revenue settings updated', 'CPM and AdSense config saved', '💰');
+  AdminToast.show('Revenue settings saved!', 'success');
+}
+
+// ─── Refresh Stats ────────────────────────────────
+function refreshStats() {
+  AdminToast.show('Stats refreshed!', 'success');
+  AdminLogger.log('Stats refreshed', 'Dashboard stats manually refreshed', '🔄');
+}
+
+// ─── Export Data Helpers ──────────────────────────
+function getRevenueData() {
+  return [
+    { month:'July', revenue:4200, cpm:2.20, impressions:1909090, clicks:61163 },
+    { month:'August', revenue:5100, cpm:2.30, impressions:2217391, clicks:71043 },
+    { month:'September', revenue:4800, cpm:2.35, impressions:2042553, clicks:65362 },
+    { month:'October', revenue:6200, cpm:2.40, impressions:2583333, clicks:82666 },
+    { month:'November', revenue:7400, cpm:2.45, impressions:3020408, clicks:96653 },
+    { month:'December', revenue:8200, cpm:2.50, impressions:3280000, clicks:104960 },
+  ];
+}
+
+function getAnalyticsData() {
+  const labels = AdminCharts.getLast30DaysLabels();
+  return labels.map((d, i) => ({ date: d, visitors: 4000 + Math.round(Math.random()*2000), sessions: 3000 + Math.round(Math.random()*1500) }));
+}
+
+// ─── Report Download ──────────────────────────────
+function downloadReport() {
+  AdminExport.toPDF('PianoVerse Dashboard Report - ' + new Date().toLocaleDateString(),
+    `<p>Generated: ${new Date().toLocaleString()}</p>
+    <table><tr><th>Metric</th><th>Value</th></tr>
+    <tr><td>Total Users</td><td>180,421</td></tr>
+    <tr><td>Active Today</td><td>4,832</td></tr>
+    <tr><td>Songs Played</td><td>2,400,000+</td></tr>
+    <tr><td>Est. Revenue (Month)</td><td>$8,240</td></tr>
+    <tr><td>Downloads</td><td>28,130</td></tr>
+    <tr><td>Ad Clicks</td><td>12,841</td></tr>
+    </table>`
+  );
+}
+
+// ─── Mini PVDB for admin ──────────────────────────
+window.PVDB_Admin = {
+  getUsers() {
+    try { return JSON.parse(localStorage.getItem('pv_users')) || []; } catch { return []; }
+  }
+};
+
+// ─── Show announcement if set ─────────────────────
+const settings = JSON.parse(localStorage.getItem('pv_settings') || '{}');
+if (settings.announcement) {
+  document.getElementById('announcementBanner').style.display = 'flex';
+  document.getElementById('announcementText').textContent = settings.announcement;
+}
+
+// ─── Initial Renders ──────────────────────────────
+renderRecentUsers();
+renderActivityLog();
+AdminLogger.log('Session started', `Login from ${navigator.platform}`, '🔐');
+</script>
+</body>
+</html>

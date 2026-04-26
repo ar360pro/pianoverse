@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Layouts | PianoVerse Admin</title>
+  <link rel="stylesheet" href="assets/css/admin.css">
+  <style>
+    .layout-item { background:var(--ad-card); border:1px solid var(--ad-border); border-radius:var(--ad-radius-lg); padding:20px; display:flex; align-items:center; gap:16px; margin-bottom:12px; transition:var(--ad-transition); }
+    .layout-item:hover { border-color:var(--ad-border-hover); box-shadow:var(--ad-shadow); }
+    .layout-item.dragging { opacity:0.5; border-style:dashed; }
+    .layout-drag-handle { cursor:grab; color:var(--ad-text-muted); font-size:1.1rem; padding:4px; }
+    .layout-drag-handle:active { cursor:grabbing; }
+    .layout-swatch { width:60px; height:40px; border-radius:8px; flex-shrink:0; border:1px solid rgba(255,255,255,0.1); display:flex; align-items:flex-end; justify-content:center; padding:4px; gap:1px; overflow:hidden; }
+    .swatch-key { border-radius:0 0 2px 2px; }
+    .layout-info { flex:1; }
+    .layout-name { font-weight:700; font-size:0.95rem; margin-bottom:2px; }
+    .layout-meta { font-size:0.78rem; color:var(--ad-text-muted); }
+    .layout-controls { display:flex; align-items:center; gap:10px; }
+  </style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="admin-sidebar" id="adminSidebar">
+  <div class="sidebar-logo"><div class="logo-icon">🎹</div><span class="logo-text">Piano<span>Verse</span></span></div>
+  <div class="sidebar-section">
+    <ul class="sidebar-nav">
+      <li><a href="admin-dashboard.html" class="nav-link"><span class="nav-icon">📊</span> Dashboard</a></li>
+      <li><a href="admin-users.html" class="nav-link"><span class="nav-icon">👥</span> Users</a></li>
+      <li><a href="admin-songs.html" class="nav-link"><span class="nav-icon">🎵</span> Songs</a></li>
+      <li><a href="admin-layouts.html" class="nav-link active"><span class="nav-icon">🎹</span> Layouts</a></li>
+      <li><a href="admin-ads.html" class="nav-link"><span class="nav-icon">📢</span> Ads</a></li>
+      <li><a href="admin-seo.html" class="nav-link"><span class="nav-icon">🔍</span> SEO</a></li>
+      <li><a href="admin-settings.html" class="nav-link"><span class="nav-icon">⚙️</span> Settings</a></li>
+    </ul>
+  </div>
+  <div class="sidebar-footer">
+    <div class="admin-user-badge"><div class="user-avatar" id="userAvatarSidebar">A</div><div class="user-info"><div class="user-name" id="userNameSidebar">Admin</div><div class="user-role">Super Admin</div></div></div>
+    <a href="#" class="nav-link admin-logout-btn"><span class="nav-icon">🚪</span> Log Out</a>
+  </div>
+</aside>
+<header class="admin-topbar">
+  <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+  <div><div class="topbar-title">Piano Layouts</div><div class="topbar-breadcrumb"><span>PianoVerse</span><span class="sep">›</span><span>Layouts</span></div></div>
+  <div class="topbar-actions">
+    <button class="topbar-icon-btn" id="themeToggleBtn">🌙</button>
+    <a href="admin-dashboard.html" class="ad-btn ad-btn-secondary">← Dashboard</a>
+  </div>
+</header>
+<main class="admin-content">
+  <div class="page-header">
+    <div class="page-header-left"><h1>Piano Layouts</h1><p>Manage, reorder, and configure all piano keyboard layouts</p></div>
+    <div class="page-actions">
+      <button class="ad-btn ad-btn-primary" onclick="openAddLayout()">+ Add Layout</button>
+    </div>
+  </div>
+
+  <div class="ad-alert ad-alert-info" style="margin-bottom:20px;">
+    <span>ℹ️</span> <span>Drag layouts to reorder them. Changes are saved instantly to the database.</span>
+  </div>
+
+  <div id="layoutsList"></div>
+</main>
+
+<!-- Add/Edit Layout Modal -->
+<div class="ad-modal-overlay" id="layoutModal">
+  <div class="ad-modal">
+    <div class="ad-modal-header">
+      <div class="ad-modal-title" id="layoutModalTitle">Add Layout</div>
+      <button class="ad-modal-close" onclick="AdminUI.hideModal('layoutModal')">✕</button>
+    </div>
+    <div class="two-col">
+      <div class="ad-form-group"><label class="ad-label">Layout Name</label><input type="text" class="ad-input" id="lName" placeholder="e.g. Galaxy Dark"></div>
+      <div class="ad-form-group"><label class="ad-label">Key Count</label><input type="number" class="ad-input" id="lKeys" value="49" min="13" max="88"></div>
+    </div>
+    <div class="ad-form-group"><label class="ad-label">Theme Color (Hex)</label><input type="color" class="ad-input" id="lColor" value="#6366f1" style="height:42px;cursor:pointer;"></div>
+    <div class="toggle-row">
+      <div class="toggle-info"><h4>Premium Layout</h4><p>Require premium subscription to access</p></div>
+      <label class="ad-toggle"><input type="checkbox" id="lPremium"><span class="toggle-slider"></span></label>
+    </div>
+    <div class="toggle-row">
+      <div class="toggle-info"><h4>Enabled</h4><p>Show this layout to users</p></div>
+      <label class="ad-toggle"><input type="checkbox" id="lEnabled" checked><span class="toggle-slider"></span></label>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:20px;">
+      <button class="ad-btn ad-btn-secondary" style="flex:1" onclick="AdminUI.hideModal('layoutModal')">Cancel</button>
+      <button class="ad-btn ad-btn-primary" style="flex:1" onclick="saveLayout()">Save Layout</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/js/admin.js"></script>
+<script>
+const session = AdminAuth.requireAuth();
+document.getElementById('userNameSidebar').textContent = session?.name || 'Admin';
+document.getElementById('userAvatarSidebar').textContent = (session?.name || 'A')[0];
+AdminUI.initSidebar();
+
+let layouts = [];
+let editingLayoutId = null;
+let dragSrc = null;
+
+function loadLayouts() {
+  try {
+    const settings = JSON.parse(localStorage.getItem('pv_settings') || '{}');
+    layouts = settings.layouts || defaultLayouts();
+  } catch { layouts = defaultLayouts(); }
+  renderLayouts();
+}
+
+function defaultLayouts() {
+  return [
+    { id:1, name:'Classic 88', keys:88, enabled:true, premium:false, color:'#f8f9ff' },
+    { id:2, name:'Mini 25', keys:25, enabled:true, premium:false, color:'#e0f0ff' },
+    { id:3, name:'Neon Glow', keys:49, enabled:true, premium:true, color:'#00c8ff' },
+    { id:4, name:'Vintage Jazz', keys:49, enabled:true, premium:false, color:'#f5deb3' },
+    { id:5, name:'Dark Matter', keys:61, enabled:true, premium:true, color:'#2a2a3e' },
+    { id:6, name:'Aurora', keys:37, enabled:true, premium:true, color:'#c4b5fd' },
+    { id:7, name:'Glass', keys:49, enabled:true, premium:true, color:'rgba(200,230,255,0.6)' },
+    { id:8, name:'Blues Scale', keys:13, enabled:true, premium:false, color:'#93c5fd' },
+    { id:9, name:'Pentatonic', keys:11, enabled:true, premium:false, color:'#86efac' },
+    { id:10, name:'Chromatic 37', keys:37, enabled:false, premium:true, color:'#fca5a5' },
+  ];
+}
+
+function renderLayouts() {
+  const container = document.getElementById('layoutsList');
+  container.innerHTML = layouts.map((l, idx) => `
+    <div class="layout-item" id="layout-${l.id}" draggable="true"
+         ondragstart="dragStart(event, ${idx})" ondragover="dragOver(event)" ondrop="drop(event, ${idx})" ondragend="dragEnd()">
+      <div class="layout-drag-handle" title="Drag to reorder">⠿</div>
+      <div class="layout-swatch" style="background:${l.color}20;border-color:${l.color}40">
+        ${[0,1,2,3,4,1,6].map(k => `<div class="swatch-key" style="width:${k===1?'7px':'10px'};height:${k===1?'60%':'100%'};background:${k===1?'#0a0a14':l.color};border-radius:0 0 2px 2px;border:1px solid rgba(0,0,0,0.15);"></div>`).join('')}
+      </div>
+      <div class="layout-info">
+        <div class="layout-name">${l.name} ${l.premium ? '<span class="ad-tag ad-tag-yellow" style="margin-left:6px;">Premium</span>' : ''}</div>
+        <div class="layout-meta">${l.keys} keys · ${l.enabled ? '✅ Enabled' : '🚫 Disabled'}</div>
+      </div>
+      <div class="layout-controls">
+        <input type="color" value="${l.color.startsWith('rgba') ? '#6366f1' : l.color}" 
+               onchange="changeColor(${l.id}, this.value)" 
+               style="width:32px;height:32px;border:1px solid var(--ad-border);border-radius:8px;padding:2px;cursor:pointer;background:none;"
+               title="Change color">
+        <label class="ad-toggle" title="${l.enabled ? 'Disable' : 'Enable'}">
+          <input type="checkbox" ${l.enabled ? 'checked' : ''} onchange="toggleLayout(${l.id}, this.checked)">
+          <span class="toggle-slider"></span>
+        </label>
+        <button class="action-btn" onclick="editLayout(${l.id})" title="Edit">✏️</button>
+        <button class="action-btn danger" onclick="deleteLayout(${l.id})" title="Delete">🗑</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Drag reorder
+function dragStart(e, idx) { dragSrc = idx; e.target.classList.add('dragging'); }
+function dragOver(e) { e.preventDefault(); }
+function dragEnd() { document.querySelectorAll('.layout-item').forEach(el => el.classList.remove('dragging')); }
+function drop(e, targetIdx) {
+  e.preventDefault();
+  if (dragSrc === null || dragSrc === targetIdx) return;
+  const moved = layouts.splice(dragSrc, 1)[0];
+  layouts.splice(targetIdx, 0, moved);
+  saveLayouts();
+  renderLayouts();
+  AdminLogger.log('Layout reordered', moved.name, '🔀');
+}
+
+function toggleLayout(id, val) {
+  const l = layouts.find(l => l.id === id);
+  if (l) { l.enabled = val; saveLayouts(); AdminLogger.log(val ? 'Layout enabled' : 'Layout disabled', l.name, val ? '✅' : '🚫'); AdminToast.show(`Layout ${val ? 'enabled' : 'disabled'}: ${l.name}`, 'success'); }
+}
+
+function changeColor(id, color) {
+  const l = layouts.find(l => l.id === id);
+  if (l) { l.color = color; saveLayouts(); AdminLogger.log('Layout color changed', l.name, '🎨'); }
+}
+
+function openAddLayout() {
+  editingLayoutId = null;
+  document.getElementById('layoutModalTitle').textContent = 'Add Layout';
+  document.getElementById('lName').value = '';
+  document.getElementById('lKeys').value = '49';
+  document.getElementById('lPremium').checked = false;
+  document.getElementById('lEnabled').checked = true;
+  AdminUI.showModal('layoutModal');
+}
+
+function editLayout(id) {
+  const l = layouts.find(l => l.id === id);
+  if (!l) return;
+  editingLayoutId = id;
+  document.getElementById('layoutModalTitle').textContent = 'Edit Layout';
+  document.getElementById('lName').value = l.name;
+  document.getElementById('lKeys').value = l.keys;
+  document.getElementById('lPremium').checked = l.premium;
+  document.getElementById('lEnabled').checked = l.enabled;
+  AdminUI.showModal('layoutModal');
+}
+
+function saveLayout() {
+  const name = document.getElementById('lName').value.trim();
+  if (!name) { AdminToast.show('Layout name required', 'warning'); return; }
+  if (editingLayoutId) {
+    const l = layouts.find(l => l.id === editingLayoutId);
+    if (l) { l.name = name; l.keys = parseInt(document.getElementById('lKeys').value); l.premium = document.getElementById('lPremium').checked; l.enabled = document.getElementById('lEnabled').checked; }
+    AdminLogger.log('Layout edited', name, '✏️');
+  } else {
+    layouts.push({ id: Date.now(), name, keys: parseInt(document.getElementById('lKeys').value), enabled: document.getElementById('lEnabled').checked, premium: document.getElementById('lPremium').checked, color: document.getElementById('lColor').value });
+    AdminLogger.log('Layout added', name, '➕');
+  }
+  saveLayouts();
+  AdminUI.hideModal('layoutModal');
+  renderLayouts();
+  AdminToast.show('Layout saved!', 'success');
+}
+
+function deleteLayout(id) {
+  if (!confirm('Delete this layout?')) return;
+  const l = layouts.find(l => l.id === id);
+  layouts = layouts.filter(l => l.id !== id);
+  saveLayouts();
+  renderLayouts();
+  AdminLogger.log('Layout deleted', l?.name, '🗑');
+  AdminToast.show('Layout deleted', 'success');
+}
+
+function saveLayouts() {
+  const settings = JSON.parse(localStorage.getItem('pv_settings') || '{}');
+  settings.layouts = layouts;
+  localStorage.setItem('pv_settings', JSON.stringify(settings));
+}
+
+loadLayouts();
+</script>
+</body>
+</html>

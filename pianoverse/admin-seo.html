@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SEO | PianoVerse Admin</title>
+  <link rel="stylesheet" href="assets/css/admin.css">
+  <style>
+    .seo-preview-box { background:#fff; border-radius:12px; padding:20px 24px; font-family:Arial,sans-serif; margin:16px 0; border:1px solid var(--ad-border); }
+    .seo-preview-url { font-size:0.8rem; color:#1a6c37; margin-bottom:3px; }
+    .seo-preview-title { font-size:1.1rem; color:#1a0dab; margin-bottom:5px; cursor:pointer; }
+    .seo-preview-title:hover { text-decoration:underline; }
+    .seo-preview-desc { font-size:0.875rem; color:#4d5156; line-height:1.5; }
+    .seo-score { width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.2rem; font-weight:800; flex-shrink:0; }
+    .keyword-chip { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; background:var(--ad-accent-light); border:1px solid rgba(99,102,241,0.2); border-radius:50px; font-size:0.78rem; color:var(--ad-accent); margin:3px; cursor:default; }
+    .keyword-chip button { background:none; border:none; color:var(--ad-accent); cursor:pointer; font-size:0.8rem; padding:0; opacity:0.6; }
+    .keyword-chip button:hover { opacity:1; }
+  </style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="admin-sidebar" id="adminSidebar">
+  <div class="sidebar-logo"><div class="logo-icon">🎹</div><span class="logo-text">Piano<span>Verse</span></span></div>
+  <div class="sidebar-section">
+    <ul class="sidebar-nav">
+      <li><a href="admin-dashboard.html" class="nav-link"><span class="nav-icon">📊</span> Dashboard</a></li>
+      <li><a href="admin-users.html" class="nav-link"><span class="nav-icon">👥</span> Users</a></li>
+      <li><a href="admin-songs.html" class="nav-link"><span class="nav-icon">🎵</span> Songs</a></li>
+      <li><a href="admin-layouts.html" class="nav-link"><span class="nav-icon">🎹</span> Layouts</a></li>
+      <li><a href="admin-ads.html" class="nav-link"><span class="nav-icon">📢</span> Ads</a></li>
+      <li><a href="admin-seo.html" class="nav-link active"><span class="nav-icon">🔍</span> SEO</a></li>
+      <li><a href="admin-settings.html" class="nav-link"><span class="nav-icon">⚙️</span> Settings</a></li>
+    </ul>
+  </div>
+  <div class="sidebar-footer">
+    <div class="admin-user-badge"><div class="user-avatar" id="userAvatarSidebar">A</div><div class="user-info"><div class="user-name" id="userNameSidebar">Admin</div><div class="user-role">Super Admin</div></div></div>
+    <a href="#" class="nav-link admin-logout-btn"><span class="nav-icon">🚪</span> Log Out</a>
+  </div>
+</aside>
+<header class="admin-topbar">
+  <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+  <div><div class="topbar-title">SEO Panel</div><div class="topbar-breadcrumb"><span>PianoVerse</span><span class="sep">›</span><span>SEO</span></div></div>
+  <div class="topbar-actions">
+    <button class="topbar-icon-btn" id="themeToggleBtn">🌙</button>
+    <a href="admin-dashboard.html" class="ad-btn ad-btn-secondary">← Dashboard</a>
+  </div>
+</header>
+<main class="admin-content">
+  <div class="page-header">
+    <div class="page-header-left"><h1>SEO Panel</h1><p>Manage meta tags, keywords, sitemap & Open Graph</p></div>
+    <div class="page-actions">
+      <button class="ad-btn ad-btn-secondary" onclick="generateSitemap()">🗺 Generate Sitemap</button>
+      <button class="ad-btn ad-btn-primary" onclick="saveSEO()">💾 Save SEO Settings</button>
+    </div>
+  </div>
+
+  <!-- SEO Score -->
+  <div class="chart-card" style="margin-bottom:24px;">
+    <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap;">
+      <div class="seo-score" style="background:rgba(16,185,129,0.12);color:var(--ad-green);border:3px solid var(--ad-green);">87</div>
+      <div style="flex:1;">
+        <div style="font-weight:700;font-size:1.1rem;margin-bottom:4px;">SEO Score: <span style="color:var(--ad-green);">Good</span></div>
+        <div style="font-size:0.85rem;color:var(--ad-text-secondary);margin-bottom:12px;">Your site is well-optimized. Fix the remaining issues to reach 100.</div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;">
+          <div style="font-size:0.8rem;color:var(--ad-green);">✅ Title length (52 chars)</div>
+          <div style="font-size:0.8rem;color:var(--ad-green);">✅ Meta description set</div>
+          <div style="font-size:0.8rem;color:var(--ad-green);">✅ Open Graph tags</div>
+          <div style="font-size:0.8rem;color:var(--ad-yellow);">⚠️ Missing alt on 3 images</div>
+          <div style="font-size:0.8rem;color:var(--ad-yellow);">⚠️ No structured data (Schema.org)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <!-- Left: SEO Form -->
+    <div>
+      <div class="chart-card" style="margin-bottom:16px;">
+        <div class="chart-title" style="margin-bottom:20px;">Homepage SEO</div>
+
+        <div class="ad-form-group">
+          <label class="ad-label">Page Title <span style="color:var(--ad-text-muted);font-weight:400;">(recommended: 50–60 chars)</span></label>
+          <input type="text" class="ad-input" id="seoTitle" value="PianoVerse - Play Piano Online | 8+ Layouts" oninput="updatePreview(); updateCharCount('seoTitle','titleCount',60)">
+          <div style="text-align:right;font-size:0.72rem;color:var(--ad-text-muted);margin-top:4px;"><span id="titleCount">43</span>/60 chars</div>
+          <div class="progress-bar" style="margin-top:4px;"><div class="progress-fill" id="titleBar" style="width:72%;background:var(--ad-green);"></div></div>
+        </div>
+
+        <div class="ad-form-group">
+          <label class="ad-label">Meta Description <span style="color:var(--ad-text-muted);font-weight:400;">(recommended: 120–160 chars)</span></label>
+          <textarea class="ad-input" id="seoDesc" rows="3" oninput="updatePreview(); updateCharCount('seoDesc','descCount',160)">Play piano online with stunning themes, 8+ layouts, and 200+ songs. Free browser piano for PC & mobile — no download required.</textarea>
+          <div style="text-align:right;font-size:0.72rem;color:var(--ad-text-muted);margin-top:4px;"><span id="descCount">124</span>/160 chars</div>
+          <div class="progress-bar" style="margin-top:4px;"><div class="progress-fill" id="descBar" style="width:78%;background:var(--ad-green);"></div></div>
+        </div>
+
+        <div class="ad-form-group">
+          <label class="ad-label">Canonical URL</label>
+          <input type="url" class="ad-input" id="seoCanonical" value="https://pianoverse.app/">
+        </div>
+      </div>
+
+      <div class="chart-card" style="margin-bottom:16px;">
+        <div class="chart-title" style="margin-bottom:20px;">Keywords</div>
+        <div class="ad-form-group">
+          <label class="ad-label">Add Keyword</label>
+          <div style="display:flex;gap:8px;">
+            <input type="text" class="ad-input" id="keywordInput" placeholder="e.g. piano online" onkeydown="if(event.key==='Enter'){addKeyword();event.preventDefault();}">
+            <button class="ad-btn ad-btn-primary" onclick="addKeyword()">Add</button>
+          </div>
+        </div>
+        <div id="keywordChips" style="margin-top:8px;"></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title" style="margin-bottom:20px;">Open Graph (Social Preview)</div>
+        <div class="ad-form-group"><label class="ad-label">OG Title</label><input type="text" class="ad-input" id="ogTitle" value="PianoVerse — Play Piano Online Free"></div>
+        <div class="ad-form-group"><label class="ad-label">OG Description</label><textarea class="ad-input" id="ogDesc" rows="2">The most beautiful browser piano. 10 themes, 200+ songs, record & share.</textarea></div>
+        <div class="ad-form-group"><label class="ad-label">OG Image URL</label><input type="url" class="ad-input" id="ogImage" value="https://pianoverse.app/assets/og-image.jpg"></div>
+        <div class="ad-form-group"><label class="ad-label">Twitter Card Type</label>
+          <select class="ad-input" id="twitterCard"><option value="summary_large_image">summary_large_image</option><option value="summary">summary</option><option value="app">app</option></select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Preview & More -->
+    <div>
+      <div class="chart-card" style="margin-bottom:16px;">
+        <div class="chart-title" style="margin-bottom:12px;">🔍 Google Search Preview</div>
+        <div class="seo-preview-box">
+          <div class="seo-preview-url">pianoverse.app › play</div>
+          <div class="seo-preview-title" id="previewTitle">PianoVerse - Play Piano Online | 8+ Layouts</div>
+          <div class="seo-preview-desc" id="previewDesc">Play piano online with stunning themes, 8+ layouts, and 200+ songs. Free browser piano for PC & mobile — no download required.</div>
+        </div>
+        <div style="font-size:0.75rem;color:var(--ad-text-muted);margin-top:8px;">Preview updates as you type above ↑</div>
+      </div>
+
+      <div class="chart-card" style="margin-bottom:16px;">
+        <div class="chart-title" style="margin-bottom:16px;">📊 SEO Checklist</div>
+        <div id="seoChecklist"></div>
+      </div>
+
+      <div class="chart-card" style="margin-bottom:16px;">
+        <div class="chart-title" style="margin-bottom:16px;">🗺 Sitemap</div>
+        <p style="font-size:0.85rem;color:var(--ad-text-secondary);margin-bottom:16px;">Auto-generate your XML sitemap for submission to Google Search Console.</p>
+        <div style="background:var(--ad-bg);border:1px solid var(--ad-border);border-radius:8px;padding:12px;font-family:var(--ad-mono);font-size:0.75rem;color:var(--ad-text-secondary);margin-bottom:12px;max-height:120px;overflow-y:auto;" id="sitemapPreview"></div>
+        <div style="display:flex;gap:8px;">
+          <button class="ad-btn ad-btn-secondary" style="flex:1" onclick="generateSitemap()">🔄 Generate</button>
+          <button class="ad-btn ad-btn-primary" style="flex:1" onclick="downloadSitemap()">⬇️ Download XML</button>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title" style="margin-bottom:16px;">🤖 Robots.txt</div>
+        <textarea class="ad-input" id="robotsTxt" rows="8" style="font-family:var(--ad-mono);font-size:0.8rem;">User-agent: *
+Allow: /
+Disallow: /admin-
+Disallow: /admin-login.html
+Disallow: /admin-dashboard.html
+
+Sitemap: https://pianoverse.app/sitemap.xml</textarea>
+        <button class="ad-btn ad-btn-primary" style="margin-top:12px;" onclick="saveRobots()">💾 Save Robots.txt</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="assets/js/admin.js"></script>
+<script>
+const session = AdminAuth.requireAuth();
+document.getElementById('userNameSidebar').textContent = session?.name || 'Admin';
+document.getElementById('userAvatarSidebar').textContent = (session?.name || 'A')[0];
+AdminUI.initSidebar();
+
+let keywords = ['piano online','play piano','learn piano','browser piano','piano app','keyboard piano','free piano','piano lessons'];
+
+function renderKeywords() {
+  document.getElementById('keywordChips').innerHTML = keywords.map((k, i) => `
+    <span class="keyword-chip">${k}<button onclick="removeKeyword(${i})">✕</button></span>
+  `).join('');
+}
+
+function addKeyword() {
+  const val = document.getElementById('keywordInput').value.trim().toLowerCase();
+  if (val && !keywords.includes(val)) {
+    keywords.push(val);
+    renderKeywords();
+    AdminToast.show(`Keyword added: "${val}"`, 'success');
+  }
+  document.getElementById('keywordInput').value = '';
+}
+
+function removeKeyword(i) {
+  keywords.splice(i, 1);
+  renderKeywords();
+}
+
+function updatePreview() {
+  const title = document.getElementById('seoTitle').value;
+  const desc = document.getElementById('seoDesc').value;
+  document.getElementById('previewTitle').textContent = title.slice(0, 70);
+  document.getElementById('previewDesc').textContent = desc.slice(0, 160);
+  updateSEOChecklist(title, desc);
+}
+
+function updateCharCount(inputId, countId, max) {
+  const len = document.getElementById(inputId).value.length;
+  const el = document.getElementById(countId);
+  el.textContent = len;
+  el.style.color = len > max ? 'var(--ad-red)' : len > max * 0.8 ? 'var(--ad-yellow)' : 'var(--ad-text-muted)';
+  const barId = inputId === 'seoTitle' ? 'titleBar' : 'descBar';
+  const bar = document.getElementById(barId);
+  if (bar) {
+    const pct = Math.min(100, (len / max) * 100);
+    bar.style.width = pct + '%';
+    bar.style.background = pct > 100 ? 'var(--ad-red)' : pct > 80 ? 'var(--ad-green)' : 'var(--ad-yellow)';
+  }
+}
+
+function updateSEOChecklist(title, desc) {
+  const checks = [
+    { label: 'Title length (50–60 chars)', ok: title.length >= 50 && title.length <= 60, warn: title.length > 0, msg: `${title.length} chars` },
+    { label: 'Meta description (120–160 chars)', ok: desc.length >= 120 && desc.length <= 160, warn: desc.length > 0, msg: `${desc.length} chars` },
+    { label: 'Keywords defined', ok: keywords.length >= 5, warn: keywords.length > 0, msg: `${keywords.length} keywords` },
+    { label: 'Canonical URL set', ok: !!document.getElementById('seoCanonical').value, warn: false, msg: '' },
+    { label: 'OG Title defined', ok: !!document.getElementById('ogTitle').value, warn: false, msg: '' },
+    { label: 'OG Image URL set', ok: !!document.getElementById('ogImage').value, warn: false, msg: '' },
+  ];
+  document.getElementById('seoChecklist').innerHTML = checks.map(c => `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--ad-border);">
+      <span style="font-size:1rem;">${c.ok ? '✅' : c.warn ? '⚠️' : '❌'}</span>
+      <span style="font-size:0.83rem;flex:1;">${c.label}</span>
+      ${c.msg ? `<span style="font-size:0.75rem;color:var(--ad-text-muted);">${c.msg}</span>` : ''}
+    </div>
+  `).join('');
+}
+
+function generateSitemap() {
+  const pages = [
+    { url: 'https://pianoverse.app/', priority: '1.0', freq: 'daily' },
+    { url: 'https://pianoverse.app/play.html', priority: '0.9', freq: 'weekly' },
+    { url: 'https://pianoverse.app/songs.html', priority: '0.8', freq: 'daily' },
+    { url: 'https://pianoverse.app/learn.html', priority: '0.8', freq: 'weekly' },
+    { url: 'https://pianoverse.app/themes.html', priority: '0.7', freq: 'monthly' },
+    { url: 'https://pianoverse.app/download.html', priority: '0.6', freq: 'monthly' },
+  ];
+  const today = new Date().toISOString().split('T')[0];
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${pages.map(p => `  <url>
+    <loc>${p.url}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>${p.freq}</changefreq>
+    <priority>${p.priority}</priority>
+  </url>`).join('\n')}
+</urlset>`;
+  document.getElementById('sitemapPreview').textContent = xml;
+  AdminToast.show('Sitemap generated!', 'success');
+  AdminLogger.log('Sitemap generated', `${pages.length} URLs`, '🗺');
+}
+
+function downloadSitemap() {
+  const content = document.getElementById('sitemapPreview').textContent;
+  if (!content) { generateSitemap(); return; }
+  const blob = new Blob([content], { type: 'application/xml' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'sitemap.xml'; a.click();
+  URL.revokeObjectURL(url);
+  AdminToast.show('sitemap.xml downloaded!', 'success');
+}
+
+function saveRobots() {
+  AdminLogger.log('Robots.txt saved', 'Robots.txt configuration updated', '🤖');
+  AdminToast.show('Robots.txt saved!', 'success');
+}
+
+function saveSEO() {
+  const s = JSON.parse(localStorage.getItem('pv_settings') || '{}');
+  s.seoTitle = document.getElementById('seoTitle').value;
+  s.seoDesc = document.getElementById('seoDesc').value;
+  s.seoKeywords = keywords;
+  s.ogTitle = document.getElementById('ogTitle').value;
+  s.ogDesc = document.getElementById('ogDesc').value;
+  s.ogImage = document.getElementById('ogImage').value;
+  localStorage.setItem('pv_settings', JSON.stringify(s));
+  AdminLogger.log('SEO settings saved', s.seoTitle, '🔍');
+  AdminToast.show('SEO settings saved!', 'success');
+}
+
+// Init
+renderKeywords();
+updatePreview();
+generateSitemap();
+updateCharCount('seoTitle', 'titleCount', 60);
+updateCharCount('seoDesc', 'descCount', 160);
+</script>
+</body>
+</html>
