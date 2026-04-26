@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Piano Themes | PianoVerse</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    .themes-hero { padding: 120px 0 60px; text-align: center; }
+    .theme-full-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; margin-top: 40px; }
+    .theme-full-card { background: var(--bg-card); border: 2px solid var(--border); border-radius: 20px; overflow: hidden; cursor: pointer; transition: var(--transition); }
+    .theme-full-card:hover { transform: translateY(-6px); box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+    .theme-full-card.selected { border-color: var(--accent-blue); box-shadow: 0 0 0 1px var(--accent-blue), 0 0 40px rgba(0,200,255,0.15); }
+    .theme-preview-area { height: 180px; display: flex; align-items: flex-end; padding: 20px; position: relative; overflow: hidden; }
+    .theme-mini-keyboard { display: flex; gap: 2px; height: 100px; width: 100%; position: relative; }
+    .tmk-white { flex: 1; border-radius: 0 0 8px 8px; border: 1px solid rgba(0,0,0,0.1); }
+    .tmk-black { position: absolute; width: 24px; height: 60%; border-radius: 0 0 5px 5px; }
+    .theme-info-bar { padding: 20px; display: flex; align-items: center; justify-content: space-between; }
+    .theme-name { font-weight: 800; font-size: 1rem; }
+    .theme-desc { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+    .theme-select-btn { padding: 8px 18px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: var(--transition); border: none; font-family: var(--font-body); }
+  </style>
+</head>
+<body>
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">Piano<span>Verse</span></a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="index.html">Home</a></li><li><a href="play.html">Play</a></li>
+      <li><a href="songs.html">Songs</a></li><li><a href="learn.html">Learn</a></li>
+      <li><a href="themes.html" class="active">Themes</a></li><li><a href="download.html">Download</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="play.html" class="btn btn-primary">🎹 Play Now</a>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
+
+<div class="themes-hero">
+  <div class="container">
+    <div class="section-tag">Themes & Layouts</div>
+    <h1 class="section-title">Your Piano, Your Aesthetic</h1>
+    <p style="color:var(--text-secondary);max-width:500px;margin:0 auto;">10 handcrafted piano themes — from sleek dark to vibrant neon. Click any theme to apply it instantly.</p>
+  </div>
+</div>
+
+<div class="container" style="padding-bottom:80px;">
+  <div class="theme-full-grid" id="themeGrid"></div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+<script src="assets/js/app.js"></script>
+<script>
+const THEMES = [
+  { id:'classic', name:'Classic Grand', desc:'Timeless ivory and ebony — the original concert hall experience', wc:'#f8f9ff', bc:'#0a0a14', bg:'linear-gradient(135deg,#1a1c2e,#0d0f1e)', glow:'rgba(200,200,255,0.1)' },
+  { id:'neon', name:'Neon Glow', desc:'Electric keys that light up the night — cyberpunk vibes', wc:'#0a1a2e', bc:'#001020', bg:'linear-gradient(135deg,#020810,#010512)', glow:'rgba(0,200,255,0.2)', accent:'#00c8ff' },
+  { id:'jazz', name:'Vintage Jazz', desc:'Warm mahogany tones of a 1940s speakeasy upright', wc:'#f5deb3', bc:'#2d1810', bg:'linear-gradient(135deg,#1a0e08,#100904)', glow:'rgba(180,120,40,0.15)' },
+  { id:'aurora', name:'Aurora Borealis', desc:'Northern lights in every key — dreamy purples and greens', wc:'#e0d0ff', bc:'#1e1040', bg:'linear-gradient(135deg,#120a2e,#0a0620)', glow:'rgba(139,92,246,0.2)' },
+  { id:'glass', name:'Crystal Glass', desc:'Frosted transparency meets elegant minimalism', wc:'rgba(200,230,255,0.7)', bc:'rgba(20,40,80,0.9)', bg:'linear-gradient(135deg,#0a1828,#05101e)', glow:'rgba(150,200,255,0.1)' },
+  { id:'dark', name:'Dark Matter', desc:'Void black with subtle depth — pure focused minimalism', wc:'#1a1a2e', bc:'#06060c', bg:'linear-gradient(135deg,#050508,#02020a)', glow:'rgba(50,50,100,0.15)' },
+  { id:'blues', name:'Blues Scale', desc:'For jazz musicians — only the blues scale keys, highlighted', wc:'#93c5fd', bc:'#1e3a5f', bg:'linear-gradient(135deg,#0a1e3a,#050f1e)', glow:'rgba(59,130,246,0.2)' },
+  { id:'sunset', name:'Sunset Coral', desc:'Warm sunset hues that make every note feel golden', wc:'#fed7aa', bc:'#7c2d12', bg:'linear-gradient(135deg,#3d1000,#1e0800)', glow:'rgba(249,115,22,0.15)' },
+  { id:'mint', name:'Mint Fresh', desc:'Cool mint greens — clean, refreshing and calming', wc:'#a7f3d0', bc:'#064e3b', bg:'linear-gradient(135deg,#022c1e,#011510)', glow:'rgba(16,185,129,0.15)' },
+  { id:'galaxy', name:'Galaxy', desc:'Deep space aesthetics with glowing star-like keys', wc:'#c4b5fd', bc:'#1e1040', bg:'linear-gradient(135deg,#0a0520,#050210)', glow:'rgba(139,92,246,0.25)', accent:'#8b5cf6' },
+];
+
+let selectedTheme = localStorage.getItem('pv_theme') || 'classic';
+
+function renderThemes() {
+  document.getElementById('themeGrid').innerHTML = THEMES.map(t => `
+    <div class="theme-full-card ${selectedTheme === t.id ? 'selected' : ''}" onclick="selectTheme('${t.id}')">
+      <div class="theme-preview-area" style="background:${t.bg};">
+        <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 120%,${t.glow},transparent 70%);"></div>
+        <div class="theme-mini-keyboard" style="position:relative;z-index:1;">
+          ${[0,1,2,3,4,5,6,7,8,9,10,11,12].map((k, i) => {
+            const isBlack = [1,3,6,8,10].includes(i);
+            if (isBlack) return '';
+            return `<div class="tmk-white" style="background:linear-gradient(180deg,${t.wc} 0%,${t.wc}cc 100%);box-shadow:0 4px 8px rgba(0,0,0,0.3);"></div>`;
+          }).join('')}
+          ${[1,3,6,8,10].map((pos, i) => {
+            const wIdx = [0,1,2,3,4,5,6].indexOf([0,1,2,3,4,5,6][i]);
+            const left = (pos * 100/8) + '%';
+            return `<div class="tmk-black" style="background:${t.bc};left:${left};box-shadow:0 4px 12px rgba(0,0,0,0.6);"></div>`;
+          }).join('')}
+        </div>
+      </div>
+      <div class="theme-info-bar" style="background:var(--bg-card);">
+        <div>
+          <div class="theme-name">${t.name} ${selectedTheme === t.id ? '✓' : ''}</div>
+          <div class="theme-desc">${t.desc}</div>
+        </div>
+        <button class="theme-select-btn" style="background:${selectedTheme === t.id ? 'linear-gradient(135deg,var(--accent-blue),var(--accent-purple))' : 'rgba(255,255,255,0.06)'};color:${selectedTheme === t.id ? 'white' : 'var(--text-secondary)'};">
+          ${selectedTheme === t.id ? 'Applied' : 'Apply'}
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectTheme(id) {
+  selectedTheme = id;
+  localStorage.setItem('pv_theme', id);
+  renderThemes();
+  PVToast.show(`🎨 Theme applied: ${THEMES.find(t=>t.id===id)?.name}`, 'success');
+  PVAnalytics.track('theme_change', { theme: id });
+}
+
+renderThemes();
+window.addEventListener('scroll', () => document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50));
+document.getElementById('hamburger').addEventListener('click', () => document.getElementById('navLinks').classList.toggle('open'));
+</script>
+</body>
+</html>
